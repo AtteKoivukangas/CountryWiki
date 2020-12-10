@@ -1,3 +1,3 @@
 # Country Wiki
 
-Web application that tells information about countries. Uses restcountries.eu
+Web application that tells information about countries. Uses https://restcountries.eu/ API.

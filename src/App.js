@@ -1,55 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import countryService from './services/countries';
-import CountryList from './components/CountryList';
-import Country from './components/Country';
-import Filter from './components/Filter';
+
+// State management
+import { useDispatch, useSelector } from 'react-redux';
+import { loadCountries } from './store/actions/countries';
+
+// Components
+import HomePage from './pages/HomePage';
+import CountryPage from './pages/CountryPage';
+import AppLoader from './components/AppLoader';
 import Footer from './components/Footer';
 
 const App = () => {
-  const [countries, setCountries] = useState([]);
-  const [filter, setFilter] = useState('');
-
-  const filteredCountries = countries.filter(country => {
-    const name = country.name.toLowerCase();
-    const subregion = country.subregion.toLowerCase();
-    const loweredFilter = filter.toLowerCase();
-
-    return name.includes(loweredFilter) || subregion.includes(loweredFilter);
-  });
+  const dispatch = useDispatch();
+  const loading = useSelector(state => state.countries.loading);
 
   useEffect(() => {
-    (async () => setCountries(await countryService.getAll()))();
-  }, []);
-
-  const isLoading = () => {
-    return countries.length === 0;
-  };
-
-  const getCountry = code => {
-    const len = countries.length;
-    for (let i = 0; i < len; i++) {
-      const countryCode = countries[i].alpha2Code.toLowerCase();
-
-      if (countryCode === code.toLowerCase()) {
-        return countries[i];
-      }
-    }
-
-    return null;
-  };
+    dispatch( loadCountries() );
+  }, [dispatch]);
 
   return (
     <div className='container'>
+      <AppLoader active={ loading } />
+
       <Switch>
-        <Route path='/' exact={true}>
-          <Filter value={filter} setFilter={setFilter} />
-          <CountryList countries={filteredCountries} />
-        </Route>
-        <Route path='/:countryCode'>
-          <Country getCountry={getCountry} isLoading={isLoading} />
-        </Route>
+        <Route path='/' exact component={ HomePage } />
+        <Route path='/:countryCode' component={ CountryPage } />
       </Switch>
+
       <Footer />
     </div>
   );
